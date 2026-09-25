@@ -1,18 +1,25 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+import { redirect } from "next/navigation";
+import { getSession } from "@/server/auth";
+import { LoginForm } from "./LoginForm";
 
 export const metadata: Metadata = {
   title: "Client Login",
   description: "Sign in to your Ashford & Crane account.",
 };
 
-/**
- * Sign-in form UI. Authentication (login → MFA → session) is wired up in a
- * later phase; the sandbox MFA code will be 000000.
- */
-export default function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string }>;
+}) {
+  const session = await getSession();
+  const { next } = await searchParams;
+  if (session.userId && session.mfa === "complete") {
+    redirect(session.role === "client" ? (next ?? "/app") : "/admin");
+  }
+  if (session.mfa === "pending") redirect("/login/mfa");
   return (
     <div className="flex min-h-screen flex-col bg-platinum-100/60 dark:bg-navy-900">
       <div className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center px-6 py-16">
@@ -22,34 +29,17 @@ export default function LoginPage() {
         >
           Ashford &amp; Crane
         </Link>
-        <h1 className="mt-8 font-display text-3xl font-medium">
-          Client login
-        </h1>
+        <h1 className="mt-8 font-display text-3xl font-medium">Client login</h1>
         <p className="mt-2 text-sm text-charcoal-500 dark:text-platinum-200">
           Sign in to your account. You&apos;ll confirm with a second factor
-          next.
+          next. In this demo, every seeded user&apos;s password is{" "}
+          <code className="tnum">demo-sandbox</code> and the MFA code is{" "}
+          <code className="tnum">000000</code>.
         </p>
-        <form className="mt-8 flex flex-col gap-5" action="#">
-          <Input
-            label="Email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            required
-          />
-          <Input
-            label="Password"
-            name="password"
-            type="password"
-            autoComplete="current-password"
-            required
-          />
-          <Button type="submit">Sign in</Button>
-        </form>
+        <LoginForm next={next} />
         <p className="mt-6 text-xs leading-relaxed text-charcoal-500 dark:text-platinum-200">
           Passkeys are available where your device supports them. We will
-          never ask for your password through chat or email. This is the demo
-          environment — authentication is enabled in a later phase.
+          never ask for your password through chat or email.
         </p>
         <Link
           href="/"
