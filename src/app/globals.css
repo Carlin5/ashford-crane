@@ -1,0 +1,106 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-navy-900: #0b1220;
+  --color-navy-700: #16213a;
+  --color-midnight-600: #1e2e4f;
+  --color-charcoal-950: #141518;
+  --color-charcoal-900: #1c1e22;
+  --color-charcoal-500: #4b4f58;
+  --color-platinum-200: #dadfe6;
+  --color-platinum-100: #eef1f5;
+  --color-champagne-500: #c9a46b;
+  --color-success-600: #2e7d5b;
+  --color-warning-600: #b8863b;
+  --color-danger-600: #b3392c;
+  --color-info-600: #3d6fa6;
+
+  --font-display: var(--font-fraunces), Georgia, serif;
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+
+  --shadow-card: 0 1px 2px rgb(11 18 32 / 0.06), 0 2px 8px rgb(11 18 32 / 0.05);
+  --shadow-modal: 0 4px 16px rgb(11 18 32 / 0.10), 0 12px 40px rgb(11 18 32 / 0.12);
+  --shadow-popover: 0 2px 6px rgb(11 18 32 / 0.08), 0 8px 24px rgb(11 18 32 / 0.10);
+
+  --ease-glide: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-settle: cubic-bezier(0.4, 0, 0.2, 1);
+
+  --radius-card: 0.625rem;
+}
+
+:root {
+  color-scheme: light;
+}
+.dark {
+  color-scheme: dark;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  background-color: var(--color-white, #fff);
+  color: var(--color-charcoal-900);
+  font-family: var(--font-sans);
+}
+.dark body {
+  background-color: var(--color-charcoal-950);
+  color: var(--color-platinum-100);
+}
+
+/* Custom focus ring: 2px champagne outline offset 2px, on everything interactive */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-champagne-500);
+  outline-offset: 2px;
+}
+
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Skeleton shimmer: platinum-on-white / navy-on-charcoal sweep */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--color-platinum-100);
+}
+.dark .skeleton {
+  background-color: var(--color-navy-700);
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(255 255 255 / 0.55),
+    transparent
+  );
+  animation: shimmer 1.6s infinite;
+}
+.dark .skeleton::after {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(218 223 230 / 0.08),
+    transparent
+  );
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton::after {
+    animation: none;
+  }
+}
