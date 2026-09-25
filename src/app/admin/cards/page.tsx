@@ -1,3 +1,4 @@
+import { statusLabel } from "@/lib/labels";
 import type { Metadata } from "next";
 import { getSession } from "@/server/auth";
 import { getStore } from "@/server/store";
@@ -72,7 +73,7 @@ export default async function AdminCards({
                   <Td>{store.customers.get(c.customerId)?.name}</Td>
                   <Td>{store.accounts.get(c.accountId)?.identifier}</Td>
                   <Td>
-                    <Badge tone={frozen ? "warning" : "success"}>{c.status}</Badge>
+                    <Badge tone={frozen ? "warning" : "success"}>{statusLabel(c.status)}</Badge>
                   </Td>
                   <Td>
                     <form action={act.bind(null, c.id, frozen ? "unfreeze" : "freeze")}>

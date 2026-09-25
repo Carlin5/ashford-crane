@@ -1,3 +1,4 @@
+import { statusLabel } from "@/lib/labels";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getSession } from "@/server/auth";
@@ -84,7 +85,7 @@ export default async function AdminDashboard() {
               <Card key={status} className="px-4 py-3">
                 <span className="text-lg font-medium">{n}</span>{" "}
                 <span className="text-sm text-charcoal-500 dark:text-platinum-200">
-                  {status}
+                  {statusLabel(status)}
                 </span>
               </Card>
             ))

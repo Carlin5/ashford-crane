@@ -1,3 +1,4 @@
+import { statusLabel } from "@/lib/labels";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getSession } from "@/server/auth";
@@ -48,7 +49,7 @@ export default async function ApplicationDetail({
       <div className="flex items-center gap-4">
         <h1 className="font-display text-3xl font-medium">{app.id}</h1>
         <Badge tone={app.status === "Approved" ? "success" : "info"}>
-          {app.status}
+          {statusLabel(app.status)}
         </Badge>
         <Badge tone="neutral">{app.kind}</Badge>
       </div>
@@ -104,7 +105,7 @@ export default async function ApplicationDetail({
         <div className="mt-3 space-y-2">
           {app.history.map((h, i) => (
             <Card key={i} className="flex items-center justify-between p-4 text-sm">
-              <span>{h.status}</span>
+              <span>{statusLabel(h.status)}</span>
               <span className="text-charcoal-500 dark:text-platinum-200">
                 {new Date(h.at).toLocaleString()}
                 {h.by ? `, by ${h.by}` : ""}

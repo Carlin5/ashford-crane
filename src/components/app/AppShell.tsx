@@ -87,7 +87,7 @@ export function AppShell({
             );
           })}
         </nav>
-        <div className="border-t border-navy-700 p-4 pb-12">
+        <div className="border-t border-navy-700 p-4 pb-20">
           <p className="truncate text-sm font-medium text-white">{name}</p>
           <p className="truncate text-xs">{email}</p>
           <Link

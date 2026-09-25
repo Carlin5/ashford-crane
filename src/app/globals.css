@@ -11,6 +11,7 @@
   --color-charcoal-500: #4b4f58;
   --color-platinum-200: #dadfe6;
   --color-platinum-100: #eef1f5;
+  /* Primary CTA background — always pair with navy-900 text (8.0:1 AA). */
   --color-champagne-500: #c9a46b;
   --color-success-600: #2e7d5b;
   --color-warning-600: #b8863b;

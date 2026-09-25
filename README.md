@@ -42,14 +42,48 @@ Deployable with **zero env vars**. Optional:
   `CORPORATE`, `COMPLIANCE`, `SUPPORT`, `PARTNERSHIPS`); unset channels show a
   pending placeholder.
 
-## Demo logins (seeded, Phase B)
+## Demo logins
 
 Password for all demo users: `demo-sandbox`. Sandbox MFA code: `000000`.
+All addresses end in `@demo.ashfordcrane.test`.
 
-- `client.private@demo.ashfordcrane.test` — Private tier ("Amara Okello")
-- `client.corporate@demo.ashfordcrane.test` — Corporate ("Halcyon Trading Ltd")
-- `admin@`, `compliance@`, `ops@`, `ops2@`, `support@`, `rm@`, `finance@`,
-  `risk@` — staff roles at `demo.ashfordcrane.test`
+| Email prefix        | Role                  | Lands on | Notes                                      |
+| ------------------- | --------------------- | -------- | ------------------------------------------ |
+| `client.private`    | Client (Amara Okello) | `/app`   | Private Plus, multi-currency accounts      |
+| `client.corporate`  | Client (Halcyon)      | `/app`   | Corporate tier, dual-control approvals     |
+| `client.corporate2` | Client (Halcyon)      | `/app`   | Second corporate user                      |
+| `admin`             | Super admin           | `/admin` | Full portal incl. Users & Roles            |
+| `compliance`        | Compliance officer    | `/admin` | KYC review, cases, alerts                  |
+| `ops` / `ops2`      | Operations officer    | `/admin` | Transfer dual control needs both           |
+| `support`           | Customer support      | `/admin` | Masked PII, card freeze only               |
+| `rm`                | Relationship manager  | `/rm`    | Assigned clients only, no fund movement    |
+| `finance`           | Finance officer       | `/admin` | Transfer approvals, fees view              |
+| `risk`              | Risk officer          | `/admin` | Review-only KYC, case escalation           |
+
+## Sandbox vs production
+
+This build is the **sandbox**: all data lives in a deterministic in-memory
+store (`src/server/store`), provider integrations are simulated adapters
+(`src/server/domain/providers/sandbox.ts`) with health toggles, document
+uploads are metadata-only, and MFA accepts a fixed code. A transfer only
+reaches `Completed` when the sandbox `BankingProvider` reports completion
+(~10s after submission, advanced lazily on read).
+
+Nothing here is wired to real rails: no real funds move, no real KYC vendor
+is called, and no external network requests are made at runtime. In
+production the same domain boundaries would bind to real providers, a real
+session secret (`SESSION_SECRET`) must be set, and `NEXT_PUBLIC_ENV=production`
+hides the demo banner. `prisma/schema.prisma` documents the intended
+production schema only — the sandbox does not use a database.
+
+## Deployment
+
+Deploys cleanly on **Vercel** with zero configuration: push the repo,
+import it, and the Next.js defaults apply (`pnpm install`, `next build`).
+No env vars are required for the sandbox; set `SESSION_SECRET` (and
+`NEXT_PUBLIC_ENV`) in the Vercel project settings if needed. The in-memory
+store reseeds per server instance — serverless cold starts get fresh demo
+data, which is expected.
 
 ## Compliance guardrails (enforced in code)
 

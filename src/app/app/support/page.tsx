@@ -1,3 +1,4 @@
+import { statusLabel } from "@/lib/labels";
 import type { Metadata } from "next";
 import { getSession } from "@/server/auth";
 import { getStore, delay } from "@/server/store";
@@ -37,7 +38,7 @@ export default async function SupportPage() {
               </p>
             </div>
             <Badge tone={t.status === "resolved" ? "success" : "warning"}>
-              {t.status.replace("_", " ")}
+              {statusLabel(t.status)}
             </Badge>
           </Card>
         ))}

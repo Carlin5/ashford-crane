@@ -1,3 +1,4 @@
+import { statusLabel, tierLabel } from "@/lib/labels";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getStore } from "@/server/store";
@@ -52,7 +53,7 @@ export default async function RmClientDetail({
     <div className="space-y-8">
       <div className="flex items-center gap-4">
         <h1 className="font-display text-3xl font-medium">{customer.name}</h1>
-        <Badge tone="champagne">{customer.tier}</Badge>
+        <Badge tone="champagne">{tierLabel(customer.tier)}</Badge>
         <Badge
           tone={
             customer.riskRating === "high"
@@ -72,7 +73,7 @@ export default async function RmClientDetail({
           {app ? (
             <>
               <p>
-                Application {app.id} — <Badge tone="info">{app.status}</Badge>
+                Application {app.id} — <Badge tone="info">{statusLabel(app.status)}</Badge>
               </p>
               <p className="mt-2 text-charcoal-500 dark:text-platinum-200">
                 Submitted {new Date(app.createdAt).toLocaleDateString()}
@@ -103,7 +104,7 @@ export default async function RmClientDetail({
                   <Td>{a.identifier}</Td>
                   <Td>
                     <Badge tone={a.status === "active" ? "success" : "warning"}>
-                      {a.status}
+                      {statusLabel(a.status)}
                     </Badge>
                   </Td>
                   <Td numeric>

@@ -5,6 +5,7 @@ import { getStore } from "@/server/store";
 import { ensureSeed } from "@/server/store/seed";
 import { can } from "@/server/domain/rbac";
 import { piiMasked, maskEmail } from "@/server/pii";
+import { tierLabel } from "@/lib/labels";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Table, Th, Td } from "@/components/ui/Table";
@@ -57,7 +58,7 @@ export default async function CustomersPage() {
                     </Link>
                   </Td>
                   <Td>{c.kind}</Td>
-                  <Td>{c.tier}</Td>
+                  <Td>{tierLabel(c.tier)}</Td>
                   <Td>
                     <Badge
                       tone={

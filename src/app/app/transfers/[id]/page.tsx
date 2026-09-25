@@ -1,3 +1,4 @@
+import { statusLabel } from "@/lib/labels";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -85,7 +86,7 @@ export default async function TransferDetailPage({
           </div>
           <div>
             <dt className="text-charcoal-500 dark:text-platinum-200">Status</dt>
-            <dd className="font-medium">{t.status}</dd>
+            <dd className="font-medium">{statusLabel(t.status)}</dd>
           </div>
         </dl>
       </Card>

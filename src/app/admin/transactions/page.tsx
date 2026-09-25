@@ -1,3 +1,4 @@
+import { statusLabel } from "@/lib/labels";
 import type { Metadata } from "next";
 import { getSession } from "@/server/auth";
 import { getStore } from "@/server/store";
@@ -87,7 +88,7 @@ export default async function AdminTransactions({
                 <Td>{store.accounts.get(e.accountId)?.identifier}</Td>
                 <Td>
                   <Badge tone={tx.status === "reversed" ? "warning" : "neutral"}>
-                    {tx.status}
+                    {statusLabel(tx.status)}
                   </Badge>
                 </Td>
                 <Td numeric>

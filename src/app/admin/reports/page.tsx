@@ -1,3 +1,4 @@
+import { statusLabel } from "@/lib/labels";
 import type { Metadata } from "next";
 import { getSession } from "@/server/auth";
 import { getStore } from "@/server/store";
@@ -93,7 +94,7 @@ export default async function ReportsPage() {
                 const [status, cur] = k.split("|") as [string, Currency];
                 return (
                   <tr key={k}>
-                    <Td>{status}</Td>
+                    <Td>{statusLabel(status)}</Td>
                     <Td>{cur}</Td>
                     <Td numeric>
                       <Money amountMinor={amt} currency={cur} />
