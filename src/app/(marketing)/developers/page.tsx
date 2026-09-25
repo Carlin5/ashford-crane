@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { readFile } from "fs/promises";
+import path from "path";
 import { Table, Td, Th } from "@/components/ui/Table";
 
 export const metadata: Metadata = {
@@ -7,30 +9,27 @@ export const metadata: Metadata = {
     "Institutional API access — versioned REST endpoints under /v1, sandbox keys, and OpenAPI documentation.",
 };
 
-const endpoints = [
-  ["POST", "/v1/auth/login", "Authenticate; returns an MFA challenge."],
-  ["POST", "/v1/auth/mfa", "Complete multi-factor authentication."],
-  ["POST", "/v1/auth/logout", "End the session."],
-  ["GET", "/v1/customers/me", "Current customer profile."],
-  ["GET", "/v1/accounts", "List accounts and balances."],
-  ["GET", "/v1/accounts/:id", "Single account detail."],
-  ["GET", "/v1/transactions", "Transactions, filterable by date and currency."],
-  ["POST", "/v1/transfers", "Create a transfer (Idempotency-Key required)."],
-  ["GET", "/v1/transfers/:id", "Transfer status."],
-  ["POST", "/v1/transfers/:id/approve", "Second-authorizer approval (dual control)."],
-  ["GET", "/v1/beneficiaries", "List beneficiaries."],
-  ["POST", "/v1/beneficiaries", "Create a beneficiary."],
-  ["GET", "/v1/cards", "List cards."],
-  ["POST", "/v1/cards/:id/freeze", "Freeze a card."],
-  ["POST", "/v1/cards/:id/unfreeze", "Unfreeze a card."],
-  ["GET", "/v1/statements", "Monthly statements."],
-  ["POST", "/v1/kyc/documents", "Upload onboarding documents."],
-  ["GET", "/v1/notifications", "Notifications for the current user."],
-  ["POST", "/v1/support/tickets", "Open a support ticket."],
-  ["GET", "/v1/fx/quote", "FX quote with named reference-rate source."],
-] as const;
+/** Parses the repo's openapi.yaml into a simple endpoint list. */
+async function endpoints(): Promise<{ method: string; path: string; summary: string }[]> {
+  const yaml = await readFile(path.join(process.cwd(), "openapi.yaml"), "utf8");
+  const out: { method: string; path: string; summary: string }[] = [];
+  let currentPath = "";
+  for (const line of yaml.split("\n")) {
+    const p = line.match(/^  (\/[^:]+):/);
+    if (p) currentPath = p[1];
+    const m = line.match(/^    (get|post|put|delete|patch):/);
+    if (m && currentPath) {
+      const method = m[1].toUpperCase();
+      out.push({ method, path: currentPath, summary: "" });
+    }
+    const s = line.match(/^      summary: (.+)$/);
+    if (s && out.length) out[out.length - 1].summary = s[1];
+  }
+  return out;
+}
 
-export default function DevelopersPage() {
+export default async function DevelopersPage() {
+  const list = await endpoints();
   return (
     <section className="mx-auto max-w-6xl px-6 py-16 md:py-24">
       <h1 className="font-display text-4xl font-medium md:text-5xl">
@@ -39,10 +38,10 @@ export default function DevelopersPage() {
       <p className="mt-6 max-w-3xl text-lg leading-relaxed text-charcoal-500 dark:text-platinum-200">
         Institutional-tier API access to the platform: versioned REST under{" "}
         <code className="text-sm">/api/v1</code>, session or sandbox-key
-        authentication, idempotency keys on every financial write, and rate
-        limiting. Sandbox keys (<code className="text-sm">X-Sandbox-Key</code>)
-        are valid only against the demo environment and never against
-        production.
+        authentication (<code className="text-sm">X-Sandbox-Key</code>),
+        idempotency keys on every financial write, and rate limiting. The
+        endpoint list below is generated from this repository&apos;s{" "}
+        <code className="text-sm">openapi.yaml</code>.
       </p>
       <div className="mt-10">
         <Table>
@@ -54,12 +53,12 @@ export default function DevelopersPage() {
             </tr>
           </thead>
           <tbody>
-            {endpoints.map(([m, p, d]) => (
-              <tr key={`${m} ${p}`}>
-                <Td className="font-medium tnum">{m}</Td>
-                <Td className="tnum">{p}</Td>
+            {list.map((e) => (
+              <tr key={`${e.method} ${e.path}`}>
+                <Td className="font-medium tnum">{e.method}</Td>
+                <Td className="tnum">/v1{e.path}</Td>
                 <Td className="text-charcoal-500 dark:text-platinum-200">
-                  {d}
+                  {e.summary}
                 </Td>
               </tr>
             ))}
@@ -67,8 +66,9 @@ export default function DevelopersPage() {
         </Table>
       </div>
       <p className="mt-8 max-w-3xl text-sm leading-relaxed text-charcoal-500 dark:text-platinum-200">
-        Full OpenAPI documentation is published for Institutional clients; API
-        access is enabled per account after onboarding.
+        Sandbox keys are valid only against this demo environment and never
+        against production. API access is enabled per Institutional account
+        after onboarding.
       </p>
     </section>
   );

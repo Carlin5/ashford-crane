@@ -1,0 +1,178 @@
+openapi: 3.0.3
+info:
+  title: Ashford & Crane Platform API
+  version: "1.0.0"
+  description: >-
+    Sandbox REST API for the Ashford & Crane platform. All endpoints are
+    versioned under /api/v1. Sandbox API keys (X-Sandbox-Key: sandbox_...) are
+    valid only against the demo environment and never against production.
+servers:
+  - url: /api/v1
+paths:
+  /auth/login:
+    post:
+      summary: Start authentication; returns an MFA challenge
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string }
+      responses:
+        "200": { description: MFA required }
+        "401": { description: Invalid credentials }
+  /auth/mfa:
+    post:
+      summary: Complete MFA (sandbox code is 000000)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code]
+              properties:
+                code: { type: string, minLength: 6, maxLength: 6 }
+      responses:
+        "200": { description: Authenticated }
+        "401": { description: Bad or missing challenge }
+  /auth/logout:
+    post:
+      summary: End the session
+      responses:
+        "200": { description: Logged out }
+  /customers/me:
+    get:
+      summary: Current user and customer profile
+      responses:
+        "200": { description: Profile }
+        "401": { description: Unauthenticated }
+  /accounts:
+    get:
+      summary: List accounts with balances
+      responses:
+        "200": { description: Accounts }
+  /accounts/{id}:
+    get:
+      summary: Single account with ledger entries
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: Account }
+        "404": { description: Not found }
+  /transactions:
+    get:
+      summary: Transactions, filterable by account, currency, date, query
+      parameters:
+        - { name: accountId, in: query, schema: { type: string } }
+        - { name: currency, in: query, schema: { type: string } }
+        - { name: from, in: query, schema: { type: string, format: date } }
+        - { name: to, in: query, schema: { type: string, format: date } }
+        - { name: q, in: query, schema: { type: string } }
+        - { name: format, in: query, schema: { type: string, enum: [csv] } }
+      responses:
+        "200": { description: Transactions or CSV export }
+  /transfers:
+    post:
+      summary: Create and submit a transfer (Idempotency-Key required)
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema: { type: string }
+      responses:
+        "201": { description: Transfer created }
+        "400": { description: Validation or missing Idempotency-Key }
+    get:
+      summary: List transfers
+      responses:
+        "200": { description: Transfers }
+  /transfers/{id}:
+    get:
+      summary: Transfer status (lazily advances on provider report)
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: Transfer }
+        "404": { description: Not found }
+  /transfers/{id}/approve:
+    post:
+      summary: Staff authorization (dual control — two distinct authorizers)
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: Approval recorded }
+        "403": { description: Role cannot authorize }
+        "409": { description: Already approved by this user }
+  /beneficiaries:
+    get:
+      summary: List beneficiaries
+      responses:
+        "200": { description: Beneficiaries }
+    post:
+      summary: Create a beneficiary
+      responses:
+        "201": { description: Created }
+  /cards:
+    get:
+      summary: List cards (last4 + token only)
+      responses:
+        "200": { description: Cards }
+  /cards/{id}/freeze:
+    post:
+      summary: Freeze a card
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: Card frozen }
+  /cards/{id}/unfreeze:
+    post:
+      summary: Unfreeze a card
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: Card active }
+  /statements:
+    get:
+      summary: Monthly statement list
+      responses:
+        "200": { description: Statements }
+  /kyc/documents:
+    post:
+      summary: Record a document upload (metadata only in sandbox)
+      responses:
+        "201": { description: Recorded }
+  /notifications:
+    get:
+      summary: Notifications for the current user
+      responses:
+        "200": { description: Notifications }
+  /support/tickets:
+    post:
+      summary: Open a support ticket
+      responses:
+        "201": { description: Created }
+  /fx/quote:
+    get:
+      summary: FX quote with named reference-rate source
+      parameters:
+        - { name: from, in: query, required: true, schema: { type: string } }
+        - { name: to, in: query, required: true, schema: { type: string } }
+        - { name: amountMinor, in: query, required: true, schema: { type: integer } }
+      responses:
+        "200": { description: Quote }
+        "503": { description: FX provider unavailable }
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: ac_session
+    sandboxKey:
+      type: apiKey
+      in: header
+      name: X-Sandbox-Key
