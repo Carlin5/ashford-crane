@@ -48,7 +48,7 @@ describe("kyc state machine", () => {
       alerts: new Map(), cases: new Map(), tickets: new Map(),
       threads: new Map(), notifications: new Map(), sessions: new Map(),
       devices: new Map(), auditLog: new Map(), idempotency: new Map(),
-      providerHealth: {}, counters: new Map(),
+      providerHealth: {}, jurisdictions: [], counters: new Map(),
     };
   }
   it("never auto-approves — approval requires a reviewer action", () => {

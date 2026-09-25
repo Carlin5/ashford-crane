@@ -20,7 +20,7 @@ beforeEach(() => {
     alerts: new Map(), cases: new Map(), tickets: new Map(),
     threads: new Map(), notifications: new Map(), sessions: new Map(),
     devices: new Map(), auditLog: new Map(), idempotency: new Map(),
-    providerHealth: {}, counters: new Map(),
+    providerHealth: {}, jurisdictions: [], counters: new Map(),
   };
   store.accounts.set("src", { id: "src", customerId: "c", name: "S", currency: "USD", identifier: "s", status: "active" });
   store.accounts.set("acct_outbound", { id: "acct_outbound", customerId: "platform", name: "O", currency: "USD", identifier: "o", status: "active" });

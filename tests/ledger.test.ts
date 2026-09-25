@@ -15,7 +15,7 @@ function freshStore(): InMemoryStore {
     alerts: new Map(), cases: new Map(), tickets: new Map(),
     threads: new Map(), notifications: new Map(), sessions: new Map(),
     devices: new Map(), auditLog: new Map(), idempotency: new Map(),
-    providerHealth: {}, counters: new Map(),
+    providerHealth: {}, jurisdictions: [], counters: new Map(),
   };
   store.accounts.set("a", { id: "a", customerId: "c", name: "A", currency: "USD", identifier: "a", status: "active" });
   store.accounts.set("b", { id: "b", customerId: "c", name: "B", currency: "USD", identifier: "b", status: "active" });

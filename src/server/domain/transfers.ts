@@ -93,7 +93,12 @@ export function approveTransfer(
       `Role ${approver.role} cannot authorize fund movements`,
     );
   }
-  if (!t.approvals.includes(approver.userId)) t.approvals.push(approver.userId);
+  if (t.approvals.includes(approver.userId)) {
+    throw new DualControlError(
+      "You have already authorized this transfer — a second, distinct authorizer is required",
+    );
+  }
+  t.approvals.push(approver.userId);
   if (t.approvals.length >= 2) {
     assertDualControl(
       { userId: t.approvals[0], role: approver.role },
@@ -185,6 +190,16 @@ export function markProviderCompleted(
   });
   t.transactionId = tx.id;
   t.status = "Completed";
+  return t;
+}
+
+export function rejectTransfer(
+  store: InMemoryStore,
+  transferId: string,
+): Transfer {
+  const t = mustGet(store, transferId);
+  assertForward(t.status, "Rejected");
+  t.status = "Rejected";
   return t;
 }
 

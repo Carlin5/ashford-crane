@@ -26,6 +26,8 @@ export type PostingInput = {
   source: Transaction["source"];
   entries: PostingEntry[];
   authorization?: { approvedBy: string[] };
+  /** Backdate the posting (seed only — real postings use server time). */
+  at?: number;
 };
 
 /**
@@ -77,7 +79,7 @@ export function postTransaction(
     reference: input.reference,
     status: "posted",
     source: input.source,
-    createdAt: Date.now(),
+    createdAt: input.at ?? Date.now(),
     authorization: input.authorization,
   };
   const entries: TransactionEntry[] = input.entries.map((e) => ({

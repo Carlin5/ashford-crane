@@ -7,7 +7,8 @@ import { createTransfer, submitTransfer, authorizeTransfer } from "../domain/tra
 import { createApplication, transition } from "../domain/kyc";
 import { raiseAlert, openCase } from "../domain/compliance";
 import { audit } from "../domain/audit";
-import type { User } from "../types";
+import type { Transaction, User } from "../types";
+import { JURISDICTIONS } from "@/../config/jurisdictions";
 
 function hash(pw: string): string {
   return createHash("sha256").update(`ac-sandbox:${pw}`).digest("hex");
@@ -27,6 +28,9 @@ export function ensureSeed(store: InMemoryStore = getStore()): void {
   }
   seeded = true;
   const pw = hash(seedPassword());
+  const NOW = Date.now();
+  const DAY = 86_400_000;
+  store.jurisdictions.push(...JURISDICTIONS);
 
   const users: Omit<User, "id">[] = [
     { email: "client.private@demo.ashfordcrane.test", name: "Amara Okello", role: "client", passwordHash: pw, customerId: "cust_private" },
@@ -73,6 +77,7 @@ export function ensureSeed(store: InMemoryStore = getStore()): void {
       description: "Opening balance (demo data)",
       reference: `SEED-${id}`,
       source: "seed",
+      at: NOW - 100 * DAY,
       entries: [
         { accountId: equityId, direction: "debit", amountMinor: bal, currency: cur },
         { accountId: id, direction: "credit", amountMinor: bal, currency: cur },
@@ -80,27 +85,85 @@ export function ensureSeed(store: InMemoryStore = getStore()): void {
     });
   }
 
-  // ~60 fictional transactions across private accounts
-  const descs = [
-    "Card purchase — market", "Transfer received", "Utility payment",
-    "Card purchase — fuel", "Subscription", "Invoice settlement",
-    "FX conversion", "ATM withdrawal", "Service fee", "Refund",
+  // ~60 fictional transactions spread over the past 90 days. Each template
+  // fixes the sign — spending is always a debit, inbound always a credit —
+  // and amounts are integer minor units for the account currency.
+  type TxnTemplate = {
+    desc: string;
+    direction: "debit" | "credit";
+    source: Transaction["source"];
+    currency: Currency;
+    min: number;
+    span: number;
+  };
+  const T: TxnTemplate[] = [
+    { desc: "Card purchase — Kampala Fresh Market", direction: "debit", source: "card", currency: "USD", min: 1850, span: 6200 },
+    { desc: "Card purchase — Shell Kampala Road", direction: "debit", source: "card", currency: "USD", min: 3200, span: 4800 },
+    { desc: "Card purchase — Cafe Javas", direction: "debit", source: "card", currency: "USD", min: 950, span: 2400 },
+    { desc: "Card purchase — Aristoc Booklex", direction: "debit", source: "card", currency: "USD", min: 2400, span: 5600 },
+    { desc: "Card purchase — Emirates Airlines", direction: "debit", source: "card", currency: "USD", min: 42000, span: 68000 },
+    { desc: "Utility payment — Umeme Ltd", direction: "debit", source: "seed", currency: "USD", min: 6800, span: 5400 },
+    { desc: "Mobile money top-up — MTN", direction: "debit", source: "seed", currency: "UGX", min: 25000, span: 175000 },
+    { desc: "Grocery payment — Carrefour UAE", direction: "debit", source: "card", currency: "AED", min: 12000, span: 38000 },
+    { desc: "Subscription — Microsoft 365", direction: "debit", source: "card", currency: "USD", min: 1299, span: 400 },
+    { desc: "Subscription — Spotify Premium", direction: "debit", source: "card", currency: "USD", min: 1099, span: 200 },
+    { desc: "ATM withdrawal — Stanbic Bank", direction: "debit", source: "card", currency: "UGX", min: 200000, span: 400000 },
+    { desc: "School fees — Kampala International School", direction: "debit", source: "seed", currency: "USD", min: 85000, span: 45000 },
+    { desc: "Insurance premium — Jubilee Insurance", direction: "debit", source: "seed", currency: "KES", min: 18500, span: 12000 },
+    { desc: "Fuel — TotalEnergies Nairobi", direction: "debit", source: "card", currency: "KES", min: 4200, span: 6800 },
+    { desc: "Dinner — Mediterraneo Restaurant", direction: "debit", source: "card", currency: "UGX", min: 85000, span: 165000 },
+    { desc: "Hotel booking — Serena Hotel", direction: "debit", source: "card", currency: "USD", min: 18500, span: 32000 },
+    { desc: "Card purchase — WHSmith Heathrow", direction: "debit", source: "card", currency: "GBP", min: 1450, span: 3200 },
+    { desc: "Rail ticket — Heathrow Express", direction: "debit", source: "card", currency: "GBP", min: 2500, span: 1200 },
+    { desc: "Pharmacy — Goodlife Chemist", direction: "debit", source: "card", currency: "KES", min: 1800, span: 4200 },
+    { desc: "Salary received — Acacia Consulting", direction: "credit", source: "seed", currency: "USD", min: 685000, span: 15000 },
+    { desc: "Consulting invoice settled — inbound", direction: "credit", source: "seed", currency: "USD", min: 125000, span: 175000 },
+    { desc: "Transfer received — Nakato Estates", direction: "credit", source: "transfer", currency: "USD", min: 45000, span: 95000 },
+    { desc: "Transfer received — EUR remittance", direction: "credit", source: "transfer", currency: "EUR", min: 38000, span: 62000 },
+    { desc: "Refund — merchant reversal", direction: "credit", source: "card", currency: "USD", min: 2400, span: 8600 },
+    { desc: "Dividend payment — portfolio distribution", direction: "credit", source: "seed", currency: "USD", min: 22000, span: 48000 },
+    { desc: "Interest accrued — savings", direction: "credit", source: "seed", currency: "USD", min: 850, span: 2200 },
   ];
-  const acctIds = accountSeeds.filter(([, c]) => c === "cust_private").map(([id]) => id);
+  const privateByCurrency = new Map<Currency, string>(
+    accountSeeds
+      .filter(([, c]) => c === "cust_private")
+      .map(([id, , cur]) => [cur, id]),
+  );
   const equityFor = (cur: Currency) => `acct_equity_${cur.toLowerCase()}`;
-  const acctCur = new Map(accountSeeds.map(([id, , cur]) => [id, cur]));
   for (let i = 0; i < 60; i++) {
-    const acctId = acctIds[i % acctIds.length];
-    const cur = acctCur.get(acctId)!;
-    const amt = ((i * 37) % 900 + 50) * (cur === "UGX" ? 1000 : cur === "KES" ? 20 : 1);
-    const incoming = i % 3 === 0;
+    const tpl = T[i % T.length];
+    const acctId = privateByCurrency.get(tpl.currency)!;
+    const amt = tpl.min + ((i * 137) % tpl.span);
+    // Evenly spread across the past 90 days with deterministic jitter.
+    const at = NOW - Math.floor((i * 90 * DAY) / 60) - ((i * 7_919) % DAY);
     postTransaction(store, {
-      description: `${descs[i % descs.length]} — demo`,
+      description: tpl.desc,
       reference: `DEMO-TXN-${String(i + 1).padStart(4, "0")}`,
-      source: i % 4 === 0 ? "card" : "seed",
+      source: tpl.source,
+      at,
       entries: [
-        { accountId: acctId, direction: incoming ? "credit" : "debit", amountMinor: amt, currency: cur },
-        { accountId: equityFor(cur), direction: incoming ? "debit" : "credit", amountMinor: amt, currency: cur },
+        { accountId: acctId, direction: tpl.direction, amountMinor: amt, currency: tpl.currency },
+        { accountId: equityFor(tpl.currency), direction: tpl.direction === "debit" ? "credit" : "debit", amountMinor: amt, currency: tpl.currency },
+      ],
+    });
+  }
+  // Two FX conversions: a debit on the source account and a credit on the
+  // destination account in the same posting (per-currency balanced).
+  const FX: [Currency, Currency, number, number, number][] = [
+    ["USD", "EUR", 25_000, 22_750, 28 * DAY],
+    ["USD", "GBP", 18_000, 14_100, 55 * DAY],
+  ];
+  for (const [fromCur, toCur, outAmt, inAmt, age] of FX) {
+    postTransaction(store, {
+      description: `FX conversion — ${fromCur} to ${toCur}`,
+      reference: `DEMO-FX-${fromCur}${toCur}`,
+      source: "transfer",
+      at: NOW - age,
+      entries: [
+        { accountId: privateByCurrency.get(fromCur)!, direction: "debit", amountMinor: outAmt, currency: fromCur },
+        { accountId: equityFor(fromCur), direction: "credit", amountMinor: outAmt, currency: fromCur },
+        { accountId: privateByCurrency.get(toCur)!, direction: "credit", amountMinor: inAmt, currency: toCur },
+        { accountId: equityFor(toCur), direction: "debit", amountMinor: inAmt, currency: toCur },
       ],
     });
   }
@@ -119,6 +182,9 @@ export function ensureSeed(store: InMemoryStore = getStore()): void {
   issueCard(store, { customerId: "cust_private", accountId: "acct_usd_p", label: "Ashford Private Card", last4: "4417", token: "tok_demo_4417", expiry: "09/28", limitMinor: 500_000 });
   issueCard(store, { customerId: "cust_private", accountId: "acct_aed_p", label: "Ashford Private Card (AED)", last4: "9082", token: "tok_demo_9082", expiry: "01/27", limitMinor: 200_000 });
 
+  // A corporate card for Halcyon Trading
+  issueCard(store, { customerId: "cust_corporate", accountId: "acct_usd_c", label: "Halcyon Corporate Card", last4: "2230", token: "tok_demo_2230", expiry: "05/27", limitMinor: 2_500_000 });
+
   // Transfers in different statuses
   const t1 = createTransfer(store, {
     customerId: "cust_private", createdBy: "seed",
@@ -135,6 +201,15 @@ export function ensureSeed(store: InMemoryStore = getStore()): void {
     currency: "EUR", amountMinor: 120_000, feeMinor: 2_100,
   });
   submitTransfer(store, t2.id);
+  // Corporate transfer awaiting dual-control authorization
+  store.beneficiaries.set("ben_4", { id: "ben_4", customerId: "cust_corporate", name: "Meridian Freight Services", accountIdentifier: "KE-AC-30117", currency: "USD", bankName: "Nairobi Merchant Bank" });
+  const t3 = createTransfer(store, {
+    customerId: "cust_corporate", createdBy: "seed",
+    sourceAccountId: "acct_usd_c", beneficiaryId: "ben_4",
+    currency: "USD", amountMinor: 340_000, feeMinor: 3_200,
+    requiresApproval: true,
+  });
+  submitTransfer(store, t3.id);
 
   // KYC application under review
   const app = createApplication(store, {

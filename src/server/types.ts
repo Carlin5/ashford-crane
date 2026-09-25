@@ -228,3 +228,10 @@ export type IdempotencyRecord = {
 };
 
 export type ProviderHealthMap = Record<string, "up" | "down">;
+
+export type JurisdictionRow = {
+  country: string;
+  servicesAvailable: string;
+  onboardingStatus: string;
+  regulatoryNotes: string;
+};

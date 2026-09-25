@@ -2,6 +2,7 @@ import { getStore } from "../store";
 import { makeProviders } from "./providers/sandbox";
 import { markProviderCompleted, markFailed } from "./transfers";
 import { audit } from "./audit";
+import { notifyCustomer } from "./notifications";
 
 /**
  * Lazy status advancement on read: a Processing transfer is asked of the
@@ -22,6 +23,11 @@ export async function advanceTransfer(id: string) {
         actorRole: "operations_officer",
         action: "transfer.completed",
         target: id,
+      });
+      notifyCustomer(store, {
+        customerId: t.customerId,
+        kind: "transfer",
+        text: `Transfer ${t.reference} is complete.`,
       });
     } catch {
       markFailed(store, id);

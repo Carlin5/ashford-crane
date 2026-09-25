@@ -8,6 +8,7 @@ import type {
   Customer,
   Device,
   IdempotencyRecord,
+  JurisdictionRow,
   KycApplication,
   MessageThread,
   Notification,
@@ -45,6 +46,7 @@ export type InMemoryStore = {
   auditLog: Map<string, AuditEntry>;
   idempotency: Map<string, IdempotencyRecord>;
   providerHealth: ProviderHealthMap;
+  jurisdictions: JurisdictionRow[];
   counters: Map<string, number>;
 };
 
@@ -85,6 +87,7 @@ export function getStore(): InMemoryStore {
         kyc: "up",
         screening: "up",
       },
+      jurisdictions: [],
       counters: new Map(),
     };
   }

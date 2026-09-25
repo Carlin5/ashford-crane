@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import type { NextRequest } from "next/server";
 import { getStore, nextId } from "./store";
 import { ensureSeed } from "./store/seed";
+import { notify } from "./domain/notifications";
 import type { Role } from "./types";
 
 export type SessionData = {
@@ -75,6 +76,16 @@ export function completeLogin(
     userId: session.userId!,
     label,
     lastSeenAt: Date.now(),
+  });
+  const isNewDevice = ![...store.devices.values()].some(
+    (d) => d.userId === session.userId && d.label === label && d.id !== `dev_${sid}`,
+  );
+  notify(store, {
+    userId: session.userId!,
+    kind: "login",
+    text: isNewDevice
+      ? `Signed in from a new device — ${label}.`
+      : `Signed in — ${label}.`,
   });
   session.mfa = "complete";
   session.sessionId = sid;
