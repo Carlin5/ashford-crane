@@ -10,6 +10,7 @@ import { getStore } from "@/server/store";
 import { ensureSeed } from "@/server/store/seed";
 import { createTransfer, submitTransfer, authorizeTransfer } from "@/server/domain/transfers";
 import { audit } from "@/server/domain/audit";
+import { notifyCustomer } from "@/server/domain/notifications";
 import { CURRENCY_PRECISION, isCurrency } from "@/lib/money";
 
 const schema = z.object({
@@ -70,6 +71,13 @@ export async function POST(req: NextRequest) {
       actorId: session.userId, actorRole: session.role,
       action: "transfer.create", target: t.id,
       detail: `${body.amountMinor} ${body.currency}`,
+    });
+    notifyCustomer(store, {
+      customerId: session.customerId!,
+      kind: "transfer",
+      text: requiresApproval
+        ? `Transfer ${t.reference} is awaiting authorization.`
+        : `Transfer ${t.reference} was created and is processing.`,
     });
     return { status: 201, body: { transfer: t } };
   });

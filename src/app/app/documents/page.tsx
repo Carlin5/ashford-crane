@@ -46,7 +46,7 @@ export default async function DocumentsPage() {
                     <div>
                       <p className="text-sm font-medium">{d.name}</p>
                       <p className="text-xs text-charcoal-500 dark:text-platinum-200">
-                        {a.id} · {new Date(d.uploadedAt).toLocaleDateString()}
+                        {a.id}, {new Date(d.uploadedAt).toLocaleDateString()}
                       </p>
                     </div>
                     <Badge tone="neutral">{d.type}</Badge>

@@ -33,7 +33,7 @@ export default async function SupportPage() {
             <div>
               <p className="text-sm font-medium">{t.subject}</p>
               <p className="text-xs text-charcoal-500 dark:text-platinum-200 tnum">
-                {t.id} · {new Date(t.createdAt).toLocaleDateString()}
+                {t.id}, {new Date(t.createdAt).toLocaleDateString()}
               </p>
             </div>
             <Badge tone={t.status === "resolved" ? "success" : "warning"}>

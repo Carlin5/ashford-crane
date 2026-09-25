@@ -85,7 +85,10 @@ async function BalancePanel({ customerId }: { customerId: string }) {
           <Link key={a.id} href={`/app/accounts/${a.id}`}>
             <Card className="p-5 transition-colors hover:bg-platinum-100/60 dark:hover:bg-navy-900/40">
               <p className="text-xs text-charcoal-500 dark:text-platinum-200">
-                {a.name} · {a.identifier}
+                {a.name}
+              </p>
+              <p className="text-xs text-charcoal-500 dark:text-platinum-200">
+                {a.identifier}
               </p>
               <p className="mt-2 text-2xl font-medium">
                 <Money amountMinor={balanceFor(store, a.id)} currency={a.currency} />

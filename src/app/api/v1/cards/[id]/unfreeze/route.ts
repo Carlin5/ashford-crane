@@ -5,6 +5,7 @@ import { ensureSeed } from "@/server/store/seed";
 import { unfreezeCard } from "@/server/domain/cards";
 import { makeProviders } from "@/server/domain/providers/sandbox";
 import { audit } from "@/server/domain/audit";
+import { notifyCustomer } from "@/server/domain/notifications";
 
 export async function POST(
   req: NextRequest,
@@ -24,6 +25,11 @@ export async function POST(
   audit(store, {
     actorId: session.userId, actorRole: session.role,
     action: "card.unfreeze", target: id,
+  });
+  notifyCustomer(store, {
+    customerId: card.customerId,
+    kind: "card",
+    text: `Card ending ${card.last4} was reactivated.`,
   });
   return NextResponse.json({ card: store.cards.get(id) });
 }

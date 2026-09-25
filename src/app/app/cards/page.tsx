@@ -43,7 +43,7 @@ export default async function CardsPage() {
                   <div>
                     <h2 className="font-medium">{c.label}</h2>
                     <p className="mt-1 text-sm text-charcoal-500 dark:text-platinum-200 tnum">
-                      •••• {c.last4} · exp {c.expiry}
+                      •••• {c.last4}, exp {c.expiry}
                     </p>
                   </div>
                   <Badge tone={c.status === "frozen" ? "warning" : "success"}>
@@ -52,7 +52,7 @@ export default async function CardsPage() {
                 </div>
                 {account ? (
                   <p className="mt-4 text-sm text-charcoal-500 dark:text-platinum-200">
-                    Linked to {account.name} ·{" "}
+                    Linked to {account.name},{" "}
                     <Money
                       amountMinor={balanceFor(store, account.id)}
                       currency={account.currency}

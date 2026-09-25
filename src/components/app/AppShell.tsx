@@ -20,6 +20,7 @@ import {
   UserRound,
 } from "lucide-react";
 import type { ReactNode } from "react";
+import { NotificationBell } from "./NotificationBell";
 
 const NAV = [
   { href: "/app", label: "Overview", icon: LayoutDashboard },
@@ -86,7 +87,7 @@ export function AppShell({
             );
           })}
         </nav>
-        <div className="border-t border-navy-700 p-4">
+        <div className="border-t border-navy-700 p-4 pb-12">
           <p className="truncate text-sm font-medium text-white">{name}</p>
           <p className="truncate text-xs">{email}</p>
           <Link
@@ -99,7 +100,10 @@ export function AppShell({
       </aside>
       <div className="flex-1 border-[3px] border-dashed border-champagne-500/60 bg-white dark:bg-charcoal-950">
         <MobileNav pathname={pathname} />
-        <main className="mx-auto max-w-5xl px-6 py-8">{children}</main>
+        <div className="flex justify-end px-6 pt-4">
+          <NotificationBell />
+        </div>
+        <main className="mx-auto max-w-5xl px-6 pb-8 pt-2">{children}</main>
       </div>
     </div>
   );

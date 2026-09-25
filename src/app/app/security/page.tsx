@@ -31,7 +31,7 @@ export default async function SecurityPage() {
               <div>
                 <p className="text-sm font-medium">{s.deviceLabel}</p>
                 <p className="text-xs text-charcoal-500 dark:text-platinum-200">
-                  {s.ip} · signed in <RelativeTime at={s.createdAt} />
+                  {s.ip}, signed in <RelativeTime at={s.createdAt} />
                 </p>
               </div>
               {s.current ? <Badge tone="success">This session</Badge> : null}
