@@ -1,0 +1,264 @@
+// Ashford & Crane — production data model (documentation only).
+// This file describes the Section 26 tables for the production build.
+// The sandbox runs on an in-memory store — no Prisma client is installed
+// and no migrations run. Do not add prisma dependencies for the sandbox.
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  role         String   // client | super_admin | compliance_officer | operations_officer | customer_support | relationship_manager | finance_officer | risk_officer
+  passwordHash String
+  customerId   String?
+  sessions     Session[]
+  devices      Device[]
+  notifications Notification[]
+}
+
+model CustomerProfile {
+  id         String   @id @default(cuid())
+  kind       String   // individual | business
+  name       String
+  tier       String   // private | private_plus | corporate | institutional
+  riskRating String?
+}
+
+model BusinessProfile {
+  id              String @id @default(cuid())
+  customerId      String @unique
+  companyName     String
+  regNumber       String
+  incCountry      String
+  registeredAddr  String
+  activity        String
+}
+
+model BeneficialOwner {
+  id            String @id @default(cuid())
+  businessId    String
+  fullName      String
+  ownershipPct  Decimal
+}
+
+model Account {
+  id         String   @id @default(cuid())
+  customerId String
+  name       String
+  currency   String
+  identifier String   @unique
+  status     String   // active | restricted | closed
+  balances   AccountBalance[]
+  entries    TransactionEntry[]
+}
+
+model AccountBalance {
+  accountId   String @id
+  available   BigInt // integer minor units
+  ledger      BigInt
+  updatedAt   DateTime @updatedAt
+  account     Account @relation(fields: [accountId], references: [id])
+}
+
+model Transaction {
+  id            String   @id @default(cuid())
+  description   String
+  reference     String   @unique
+  status        String   // posted | reversed
+  source        String   // transfer | card | fee | adjustment
+  authorization Json?
+  createdAt     DateTime @default(now())
+  entries       TransactionEntry[]
+}
+
+model TransactionEntry {
+  id            String   @id @default(cuid())
+  transactionId String
+  accountId     String
+  direction     String   // debit | credit
+  amountMinor   BigInt
+  currency      String
+  transaction   Transaction @relation(fields: [transactionId], references: [id])
+  account       Account     @relation(fields: [accountId], references: [id])
+}
+
+model Beneficiary {
+  id                String @id @default(cuid())
+  customerId        String
+  name              String
+  accountIdentifier String
+  currency          String
+  bankName          String
+}
+
+model Transfer {
+  id                   String   @id @default(cuid())
+  customerId           String
+  createdBy            String
+  sourceAccountId      String
+  beneficiaryId        String
+  currency             String
+  amountMinor          BigInt
+  feeMinor             BigInt
+  fxRate               Decimal?
+  recipientAmountMinor BigInt?
+  status               String   // Draft | PendingVerification | Processing | Completed | Failed | Rejected | Cancelled
+  reference            String   @unique
+  approvals            String[]
+  scheduledFor         DateTime?
+  createdAt            DateTime @default(now())
+  submittedAt          DateTime?
+}
+
+model Card {
+  id              String @id @default(cuid())
+  customerId      String
+  accountId       String
+  label           String
+  last4           String
+  token           String @unique // tokenized — never a raw PAN
+  expiry          String
+  status          String // active | frozen
+  limitMinor      BigInt
+  controls        Json   // atm | online | contactless | allowedRegions
+  cardTransactions CardTransaction[]
+}
+
+model CardTransaction {
+  id          String @id @default(cuid())
+  cardId      String
+  amountMinor BigInt
+  currency    String
+  merchant    String
+  at          DateTime @default(now())
+  card        Card   @relation(fields: [cardId], references: [id])
+}
+
+model KycCase {
+  id        String @id @default(cuid())
+  kind      String // individual | business
+  email     String
+  status    String // ApplicationStarted | DocumentsRequired | UnderReview | AdditionalInfoRequired | Approved | Declined | Restricted
+  data      Json
+  createdAt DateTime @default(now())
+}
+
+model KybCase {
+  id        String @id @default(cuid())
+  companyId String
+  status    String
+  data      Json
+  createdAt DateTime @default(now())
+}
+
+model Document {
+  id        String @id @default(cuid())
+  ownerId   String
+  name      String
+  type      String
+  createdAt DateTime @default(now())
+}
+
+model ComplianceAlert {
+  id         String @id @default(cuid())
+  customerId String
+  kind       String // velocity | geographic | unusual_amount
+  detail     String
+  status     String
+  createdAt  DateTime @default(now())
+}
+
+model ComplianceCase {
+  id         String @id @default(cuid())
+  customerId String
+  status     String
+  assigneeId String?
+  notes      Json
+  createdAt  DateTime @default(now())
+}
+
+model SupportTicket {
+  id         String @id @default(cuid())
+  customerId String
+  subject    String
+  status     String
+  createdAt  DateTime @default(now())
+}
+
+model Message {
+  id        String @id @default(cuid())
+  threadId  String
+  sender    String // client | staff
+  text      String
+  at        DateTime @default(now())
+}
+
+model Notification {
+  id        String @id @default(cuid())
+  userId    String
+  kind      String
+  text      String
+  read      Boolean @default(false)
+  createdAt DateTime @default(now())
+  user      User   @relation(fields: [userId], references: [id])
+}
+
+model AuditLog {
+  id        String @id @default(cuid())
+  actorId   String
+  actorRole String
+  action    String
+  target    String
+  detail    String?
+  at        DateTime @default(now())
+}
+
+model Role {
+  id   String @id
+  name String @unique
+}
+
+model Permission {
+  id   String @id
+  name String @unique
+}
+
+model Session {
+  id          String @id @default(cuid())
+  userId      String
+  deviceLabel String
+  ip          String
+  createdAt   DateTime @default(now())
+  user        User   @relation(fields: [userId], references: [id])
+}
+
+model Device {
+  id         String @id @default(cuid())
+  userId     String
+  label      String
+  lastSeenAt DateTime
+  user       User   @relation(fields: [userId], references: [id])
+}
+
+model ExchangeRate {
+  id        String @id @default(cuid())
+  pair      String
+  rate      Decimal
+  asOf      DateTime
+}
+
+model Fee {
+  id         String @id @default(cuid())
+  category   String
+  corridor   String?
+  flatMinor  BigInt
+  percentBps Int
+}
