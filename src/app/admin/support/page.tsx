@@ -1,3 +1,4 @@
+import { statusLabel } from "@/lib/labels";
 import type { Metadata } from "next";
 import { getSession } from "@/server/auth";
 import { getStore } from "@/server/store";
@@ -44,7 +45,7 @@ export default async function AdminSupport() {
                 <Td>{new Date(t.createdAt).toLocaleDateString()}</Td>
                 <Td>
                   <Badge tone={t.status === "resolved" ? "success" : "warning"}>
-                    {t.status.replaceAll("_", " ")}
+                    {statusLabel(t.status)}
                   </Badge>
                 </Td>
               </tr>

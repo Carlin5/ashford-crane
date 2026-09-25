@@ -1,3 +1,4 @@
+import { statusLabel } from "@/lib/labels";
 import Link from "next/link";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
@@ -41,7 +42,7 @@ export function ApplicationList({ apps }: { apps: KycApplication[] }) {
               <Td>{a.kind}</Td>
               <Td>{new Date(a.createdAt).toLocaleDateString()}</Td>
               <Td>
-                <Badge tone={TONE[a.status] ?? "neutral"}>{a.status}</Badge>
+                <Badge tone={TONE[a.status] ?? "neutral"}>{statusLabel(a.status)}</Badge>
               </Td>
             </tr>
           ))}

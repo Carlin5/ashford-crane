@@ -1,3 +1,4 @@
+import { statusLabel } from "@/lib/labels";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getSession } from "@/server/auth";
@@ -57,7 +58,7 @@ export default async function CasesPage() {
                 <Td>{new Date(c.createdAt).toLocaleDateString()}</Td>
                 <Td>{c.assigneeId ?? "—"}</Td>
                 <Td>
-                  <Badge tone={TONE[c.status]}>{c.status.replaceAll("_", " ")}</Badge>
+                  <Badge tone={TONE[c.status]}>{statusLabel(c.status)}</Badge>
                 </Td>
               </tr>
             ))}

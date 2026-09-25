@@ -1,3 +1,4 @@
+import { statusLabel } from "@/lib/labels";
 import type { Metadata } from "next";
 import { getStore } from "@/server/store";
 import { ensureSeed } from "@/server/store/seed";
@@ -43,7 +44,7 @@ export default async function RmRequests() {
                 <Td>{new Date(t.createdAt).toLocaleDateString()}</Td>
                 <Td>
                   <Badge tone={t.status === "resolved" ? "success" : "warning"}>
-                    {t.status.replaceAll("_", " ")}
+                    {statusLabel(t.status)}
                   </Badge>
                 </Td>
               </tr>

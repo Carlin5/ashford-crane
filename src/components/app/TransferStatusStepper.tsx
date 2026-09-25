@@ -1,3 +1,4 @@
+import { statusLabel } from "@/lib/labels";
 import { Stepper } from "@/components/ui/Stepper";
 import type { TransferStatus } from "@/server/types";
 
@@ -25,7 +26,7 @@ export function TransferStatusStepper({
     <div className={compact ? "opacity-90" : ""}>
       <Stepper steps={FLOW} currentIndex={idx >= 0 ? idx : FLOW.length} />
       {terminal ? (
-        <p className="mt-2 text-sm font-medium text-danger-600">{status}</p>
+        <p className="mt-2 text-sm font-medium text-danger-600">{statusLabel(status)}</p>
       ) : null}
     </div>
   );

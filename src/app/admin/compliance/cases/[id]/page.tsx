@@ -1,3 +1,4 @@
+import { statusLabel } from "@/lib/labels";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getSession } from "@/server/auth";
@@ -60,7 +61,7 @@ export default async function CaseDetail({
       <div className="flex items-center gap-4">
         <h1 className="font-display text-3xl font-medium">{c.id}</h1>
         <Badge tone={c.status === "closed" ? "success" : "warning"}>
-          {c.status.replaceAll("_", " ")}
+          {statusLabel(c.status)}
         </Badge>
       </div>
       {error ? (

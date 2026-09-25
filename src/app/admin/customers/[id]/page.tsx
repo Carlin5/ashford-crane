@@ -1,3 +1,4 @@
+import { statusLabel, tierLabel } from "@/lib/labels";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getSession } from "@/server/auth";
@@ -51,7 +52,7 @@ export default async function CustomerDetail({
     <div className="space-y-8">
       <div className="flex items-center gap-4">
         <h1 className="font-display text-3xl font-medium">{customer.name}</h1>
-        <Badge tone="champagne">{customer.tier}</Badge>
+        <Badge tone="champagne">{tierLabel(customer.tier)}</Badge>
         <Badge
           tone={
             customer.riskRating === "high"
@@ -98,7 +99,7 @@ export default async function CustomerDetail({
                   <Td>{a.identifier}</Td>
                   <Td>
                     <Badge tone={a.status === "active" ? "success" : "warning"}>
-                      {a.status}
+                      {statusLabel(a.status)}
                     </Badge>
                   </Td>
                   <Td numeric>
@@ -114,7 +115,7 @@ export default async function CustomerDetail({
       {app && kycData ? (
         <section>
           <h2 className="font-display text-xl font-medium">
-            KYC application — {app.status}
+            KYC application — {statusLabel(app.status)}
           </h2>
           <Card className="mt-3 p-5">
             <dl className="grid gap-2 text-sm sm:grid-cols-2">

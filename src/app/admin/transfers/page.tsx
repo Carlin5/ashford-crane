@@ -1,3 +1,4 @@
+import { statusLabel } from "@/lib/labels";
 import type { Metadata } from "next";
 import { getSession } from "@/server/auth";
 import { getStore } from "@/server/store";
@@ -151,7 +152,7 @@ export default async function AdminTransfers({
                   <Td>{store.customers.get(t.customerId)?.name}</Td>
                   <Td>{store.beneficiaries.get(t.beneficiaryId)?.name}</Td>
                   <Td>
-                    <Badge tone={TONE[t.status]}>{t.status}</Badge>
+                    <Badge tone={TONE[t.status]}>{statusLabel(t.status)}</Badge>
                   </Td>
                   <Td>{t.approvals.length}</Td>
                   <Td numeric>

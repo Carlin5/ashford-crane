@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { assignedCustomers } from "./lib";
+import { tierLabel } from "@/lib/labels";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 
@@ -23,7 +24,7 @@ export default async function RmClientsPage() {
             <Card className="p-5 transition-colors hover:bg-platinum-100/60 dark:hover:bg-navy-900/40">
               <p className="font-medium">{c.name}</p>
               <p className="mt-1 text-xs text-charcoal-500 dark:text-platinum-200">
-                {c.kind}, {c.tier} tier
+                {c.kind}, {tierLabel(c.tier)} tier
               </p>
               <div className="mt-3">
                 <Badge

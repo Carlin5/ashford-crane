@@ -1,3 +1,4 @@
+import { statusLabel } from "@/lib/labels";
 import type { Metadata } from "next";
 import { getSession } from "@/server/auth";
 import { getStore } from "@/server/store";
@@ -45,7 +46,7 @@ export default async function AdminAccounts() {
                 <Td>{store.customers.get(a.customerId)?.name ?? a.customerId}</Td>
                 <Td>
                   <Badge tone={a.status === "active" ? "success" : "warning"}>
-                    {a.status}
+                    {statusLabel(a.status)}
                   </Badge>
                 </Td>
                 <Td numeric>

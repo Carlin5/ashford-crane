@@ -1,3 +1,4 @@
+import { statusLabel } from "@/lib/labels";
 import type { Metadata } from "next";
 import { getSession } from "@/server/auth";
 import { getStore, delay } from "@/server/store";
@@ -38,7 +39,7 @@ export default async function DocumentsPage() {
                     <p className="text-sm text-charcoal-500 dark:text-platinum-200">
                       Application {a.id} — no documents recorded yet.
                     </p>
-                    <Badge tone="warning">{a.status}</Badge>
+                    <Badge tone="warning">{statusLabel(a.status)}</Badge>
                   </Card>,
                 ]
               : a.documents.map((d, i) => (

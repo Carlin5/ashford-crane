@@ -1,3 +1,4 @@
+import { statusLabel } from "@/lib/labels";
 import type { Metadata } from "next";
 import { getSession } from "@/server/auth";
 import { getStore } from "@/server/store";
@@ -52,7 +53,7 @@ export default async function AlertsPage() {
                 <Td>{new Date(a.createdAt).toLocaleDateString()}</Td>
                 <Td>
                   <Badge tone={a.status === "open" ? "warning" : "neutral"}>
-                    {a.status}
+                    {statusLabel(a.status)}
                   </Badge>
                 </Td>
                 <Td>

@@ -1,3 +1,4 @@
+import { statusLabel } from "@/lib/labels";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { getSession } from "@/server/auth";
@@ -64,7 +65,7 @@ export default async function TransfersPage() {
                     <div className="text-end">
                       <Money amountMinor={t.amountMinor} currency={t.currency} className="font-medium" />
                       <div className="mt-1">
-                        <Badge tone={TONE[t.status]}>{t.status}</Badge>
+                        <Badge tone={TONE[t.status]}>{statusLabel(t.status)}</Badge>
                       </div>
                     </div>
                   </div>
