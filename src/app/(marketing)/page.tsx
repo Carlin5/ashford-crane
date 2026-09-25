@@ -60,7 +60,7 @@ export default function HomePage() {
         title="International Payments"
         href="/international-payments"
         linkLabel="How transfers work"
-        className="bg-platinum-100/60 dark:bg-navy-900/30 max-w-none"
+        tinted
       >
         <p>
           Cross-border transfers with every fee, exchange rate, and recipient
@@ -97,7 +97,7 @@ export default function HomePage() {
         title="Corporate Services"
         href="/corporate-banking"
         linkLabel="Corporate banking"
-        className="bg-platinum-100/60 dark:bg-navy-900/30 max-w-none"
+        tinted
       >
         <p>
           Business accounts, employee cards with spending controls, multi-user
@@ -122,7 +122,7 @@ export default function HomePage() {
         title="Cards & Payments"
         href="/cards"
         linkLabel="See the cards"
-        className="bg-platinum-100/60 dark:bg-navy-900/30 max-w-none"
+        tinted
       >
         <p>
           The Ashford Private Card and Ashford Corporate Card, issued through a
